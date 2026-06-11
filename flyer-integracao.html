@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flyer de Integração — Gerador (Template)</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- lib de QR code (gera no proprio navegador) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/*
+  GERADOR DE FLYER DE INTEGRACAO
+  Autor: Davi Senise
+
+  Painel a esquerda (edita) + preview do flyer a direita (imprime).
+  Gera QR codes no navegador pra: link de app, Wi-Fi do local e
+  formulario de treinamento.
+
+  DADOS FICTICIOS. Edite o painel ou troque os valores padrao no
+  objeto CONFIG (no <script>) pra usar de verdade.
+*/
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --font:'Plus Jakarta Sans',sans-serif;
+  --ink:#111318;--red:#d63031;--bg:#e6e6e8;--surface:#f7f7f8;
+  --border:#e2e2e4;--muted:#888;--white:#fff;
+}
+body{font-family:var(--font);background:var(--bg);min-height:100vh;
+     display:grid;grid-template-columns:300px 1fr}
+
+/* ---- PAINEL (edicao) ---- */
+.panel{background:var(--ink);padding:22px 18px;display:flex;flex-direction:column;
+       min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto}
+.p-logo{display:flex;align-items:center;gap:8px;margin-bottom:22px}
+.p-dot{width:8px;height:8px;border-radius:50%;background:var(--red)}
+.p-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.12em;text-transform:uppercase}
+.p-sec{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.14em;
+       text-transform:uppercase;margin:14px 0 10px}
+.fg{margin-bottom:12px}
+.fl{font-size:11px;font-weight:500;color:rgba(255,255,255,.45);margin-bottom:4px;display:block}
+.fi{width:100%;padding:8px 11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+    border-radius:7px;color:#fff;font-family:var(--font);font-size:13px;outline:none}
+.fi:focus{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.1)}
+.fi::placeholder{color:rgba(255,255,255,.2)}
+.sep{height:1px;background:rgba(255,255,255,.08);margin:14px 0}
+.btns{margin-top:auto;padding-top:16px}
+.bp{width:100%;padding:11px;border:none;border-radius:8px;background:var(--red);color:#fff;
+    font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.bp:hover{opacity:.9}
+
+/* ---- PREVIEW ---- */
+.preview{display:flex;flex-direction:column;align-items:center;padding:32px 24px}
+.prev-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:14px}
+
+/* ---- FLYER ---- */
+.flyer{width:420px;max-width:100%;background:var(--white);border-radius:18px;overflow:hidden;
+       box-shadow:0 12px 40px rgba(0,0,0,.14)}
+.fl-head{background:var(--ink);color:#fff;padding:28px 26px;text-align:center;position:relative}
+.fl-logo{width:54px;height:54px;border-radius:13px;background:var(--red);display:flex;align-items:center;
+         justify-content:center;font-weight:800;font-size:1.2rem;margin:0 auto 12px}
+.fl-brand{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:6px}
+.fl-title{font-size:1.45rem;font-weight:800;line-height:1.15}
+.fl-sub{font-size:.82rem;color:rgba(255,255,255,.6);margin-top:8px;line-height:1.4}
+.fl-body{padding:22px 26px 28px}
+.block{display:flex;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--border)}
+.block:last-child{border-bottom:0}
+.qr{width:104px;height:104px;flex-shrink:0;background:#fff;border:1px solid var(--border);border-radius:10px;
+    padding:6px;display:flex;align-items:center;justify-content:center}
+.qr img,.qr canvas{width:100%!important;height:100%!important}
+.b-info{flex:1;min-width:0}
+.b-step{font-size:10px;font-weight:700;color:var(--red);letter-spacing:.1em;text-transform:uppercase}
+.b-title{font-size:1.05rem;font-weight:700;margin:3px 0 4px;color:var(--ink)}
+.b-desc{font-size:.8rem;color:#666;line-height:1.45}
+.b-meta{font-size:.74rem;color:#999;margin-top:5px;word-break:break-all}
+.fl-foot{background:var(--surface);padding:14px 26px;text-align:center;font-size:.72rem;color:#999}
+
+@media print{
+  body{display:block;background:#fff}
+  .panel{display:none}
+  .preview{padding:0}
+  .prev-lbl{display:none}
+  .flyer{box-shadow:none;border-radius:0;width:100%}
+}
+@media(max-width:760px){
+  body{grid-template-columns:1fr}
+  .panel{position:static;height:auto;min-height:0}
+}
+</style>
+</head>
+<body>
+
+  <!-- PAINEL -->
+  <div class="panel">
+    <div class="p-logo"><span class="p-dot"></span><span class="p-title">Gerador de Flyer</span></div>
+
+    <div class="p-sec">Cabecalho</div>
+    <div class="fg"><label class="fl">Marca</label><input class="fi" id="i-brand" value="Empresa Exemplo"></div>
+    <div class="fg"><label class="fl">Titulo</label><input class="fi" id="i-title" value="Integracao de Novos Colaboradores"></div>
+    <div class="fg"><label class="fl">Subtitulo</label><input class="fi" id="i-sub" value="Escaneie os codigos para comecar"></div>
+
+    <div class="sep"></div>
+    <div class="p-sec">1 · Aplicativo</div>
+    <div class="fg"><label class="fl">Link do app</label><input class="fi" id="i-app" value="https://exemplo.com/baixar-app"></div>
+
+    <div class="p-sec">2 · Wi-Fi</div>
+    <div class="fg"><label class="fl">Rede (SSID)</label><input class="fi" id="i-ssid" value="VisitanteExemplo"></div>
+    <div class="fg"><label class="fl">Senha</label><input class="fi" id="i-pass" value="bemvindo123"></div>
+
+    <div class="p-sec">3 · Treinamento</div>
+    <div class="fg"><label class="fl">Link do formulario</label><input class="fi" id="i-form" value="https://forms.exemplo.com/treinamento"></div>
+
+    <div class="btns"><button class="bp" onclick="window.print()">Imprimir / Salvar PDF</button></div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview">
+    <div class="prev-lbl">Pre-visualizacao</div>
+    <div class="flyer">
+      <div class="fl-head">
+        <div class="fl-logo">EE</div>
+        <div class="fl-brand" id="o-brand">Empresa Exemplo</div>
+        <div class="fl-title" id="o-title">Integracao de Novos Colaboradores</div>
+        <div class="fl-sub" id="o-sub">Escaneie os codigos para comecar</div>
+      </div>
+      <div class="fl-body">
+        <div class="block">
+          <div class="qr" id="qr-app"></div>
+          <div class="b-info">
+            <div class="b-step">Passo 1</div>
+            <div class="b-title">Baixe o aplicativo</div>
+            <div class="b-desc">Aponte a camera para baixar o app na loja.</div>
+          </div>
+        </div>
+        <div class="block">
+          <div class="qr" id="qr-wifi"></div>
+          <div class="b-info">
+            <div class="b-step">Passo 2</div>
+            <div class="b-title">Conecte no Wi-Fi</div>
+            <div class="b-desc">Conexao automatica ao escanear.</div>
+            <div class="b-meta" id="o-wifi">Rede: VisitanteExemplo</div>
+          </div>
+        </div>
+        <div class="block">
+          <div class="qr" id="qr-form"></div>
+          <div class="b-info">
+            <div class="b-step">Passo 3</div>
+            <div class="b-title">Declaracao de treinamento</div>
+            <div class="b-desc">Preencha ao final da integracao.</div>
+          </div>
+        </div>
+      </div>
+      <div class="fl-foot">Duvidas? Fale com o suporte de TI.</div>
+    </div>
+  </div>
+
+<script>
+/* ============================================================
+   CONFIG — valores padrao (FICTICIOS). Tambem da pra editar
+   tudo ao vivo pelo painel da esquerda.
+   ============================================================ */
+
+// monta a string padrao de QR de Wi-Fi (formato que o celular le)
+function wifiString(ssid, senha){
+  return "WIFI:T:WPA;S:" + ssid + ";P:" + senha + ";;";
+}
+
+// (re)gera um QR dentro de um elemento
+function gerarQR(elId, texto){
+  var el = document.getElementById(elId);
+  el.innerHTML = "";
+  if(!texto) return;
+  new QRCode(el, { text: texto, width: 200, height: 200, colorDark: "#111318", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+}
+
+function atualizar(){
+  // cabecalho
+  document.getElementById('o-brand').textContent = val('i-brand');
+  document.getElementById('o-title').textContent = val('i-title');
+  document.getElementById('o-sub').textContent   = val('i-sub');
+
+  // QR codes
+  gerarQR('qr-app', val('i-app'));
+  gerarQR('qr-wifi', wifiString(val('i-ssid'), val('i-pass')));
+  gerarQR('qr-form', val('i-form'));
+
+  // meta do wifi
+  document.getElementById('o-wifi').textContent = "Rede: " + val('i-ssid');
+}
+
+function val(id){ return document.getElementById(id).value.trim(); }
+
+// liga todos os inputs pra atualizar ao vivo
+['i-brand','i-title','i-sub','i-app','i-ssid','i-pass','i-form'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', atualizar);
+});
+
+// primeira renderizacao
+atualizar();
+</script>
+</body>
+</html>
