@@ -67,7 +67,7 @@ Navegador com internet (a biblioteca de QR é carregada via CDN). Depois de aber
 
 ## nota sobre portfólio
 
-Versão com dados fictícios. Se adaptar do real, remova antes de publicar: SSID/senha reais de Wi-Fi, links internos, URL real do formulário, caminhos de OneDrive/SharePoint e logos de terceiros.
+Versão com dados fictícios. Se for adaptar pra uso ou publicar, preste atenção em divulgar: SSID/senha reais de Wi-Fi, links internos, URL real do formulário, caminhos de OneDrive/SharePoint e logos de terceiros.
 
 ---
 
